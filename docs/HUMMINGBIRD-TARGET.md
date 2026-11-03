@@ -440,3 +440,23 @@ Only then may tunaOS advance its package pin and run image and runtime
 qualification. Existing image PR `tunaOS#3885` retains its manual merge
 fence and the observed beta.1 pin until that served evidence exists.
 
+
+## Laptop audio firmware roots (#2064)
+
+GNOME and COSMIC declare `alsa-sof-firmware` and `alsa-firmware` as required and
+installed roots. Rawhide's primary index names the SOF binary and source `alsa-sof-firmware`;
+there is no `sof-firmware` binary or provide. These are separate Fedora source
+packages, not subpackages of `linux-firmware`. The component audit also holds them in each desktop's
+install list. Regenerate the runtime closure with
+`scripts/measure-target-gap.py --target hummingbird --report-json
+docs/hummingbird-desktop-gap.json --build-order
+build-order-hummingbird-desktops.yml` before the next chain build. Do not
+hand-edit the generated order: the measurement subtracts packages already
+provided by the target and consumed repositories. Publication is complete
+only when the rebuilt GNOME and COSMIC image `.packages` artifacts list both
+names; a virtio audio test cannot establish laptop firmware coverage.
+
+The gap engine respects each consumed index's `serves` list. Utah's GNOME
+repository supplies `alsa-firmware` to GNOME only. Counting it for COSMIC
+would omit the ALSA source from the build order even though COSMIC cannot
+install from that repository. The generated report records those scopes.
